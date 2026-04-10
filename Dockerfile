@@ -1,19 +1,11 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM tomcat:10-jre21-temurin-jammy
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Remove default Tomcat apps
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-WORKDIR /app
-
-COPY target/myapp.war app.war
-
-RUN chown appuser:appgroup app.war
-
-USER appuser
+# Copy your WAR as ROOT.war so it runs at   http://host:8080/
+COPY target/myapp.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-  "-jar", "app.war"]
+CMD ["catalina.sh", "run"]
